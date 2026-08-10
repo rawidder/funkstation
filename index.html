@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A1B26">
+<title>Funkstation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A1B26;
+  --panel:#12303F;
+  --panel-2:#0E2532;
+  --brass:#F0A93B;
+  --brass-dark:#A96C15;
+  --glow:#FFD98A;
+  --paper:#EFE3CB;
+  --mint:#4FD1A5;
+  --red:#E4572E;
+  --line:rgba(239,227,203,.16);
+  --display:'Bungee',system-ui,sans-serif;
+  --body:'Space Grotesk',system-ui,sans-serif;
+  --mono:'Space Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:
+    radial-gradient(120% 60% at 50% -10%, #1B4457 0%, transparent 60%),
+    var(--ink);
+  color:var(--paper);
+  font-family:var(--body);
+  overscroll-behavior:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.app{
+  max-width:520px;margin:0 auto;min-height:100%;
+  display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 0 0;
+}
+
+/* ---------- Kopf ---------- */
+header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px 10px;
+}
+.logo{
+  font-family:var(--display);font-size:19px;letter-spacing:.06em;
+  color:var(--brass);line-height:1;
+}
+.logo small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.34em;color:rgba(239,227,203,.5);margin-top:5px}
+.toggles{margin-left:auto;display:flex;gap:8px}
+.tg{
+  width:42px;height:42px;border-radius:12px;border:1px solid var(--line);
+  background:var(--panel-2);color:rgba(239,227,203,.35);font-size:18px;
+  display:grid;place-items:center;cursor:pointer;transition:.15s;
+}
+.tg[aria-pressed="true"]{color:var(--brass);border-color:rgba(240,169,59,.55);background:rgba(240,169,59,.12)}
+
+/* ---------- Lampe ---------- */
+.lamp{
+  height:16px;border-radius:99px;margin:2px 16px 0;
+  background:linear-gradient(180deg,#0c2431,#081820);
+  border:1px solid var(--line);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.6);
+  transition:background .04s linear, box-shadow .06s linear;
+}
+body.signal .lamp{
+  background:linear-gradient(180deg,var(--glow),var(--brass));
+  box-shadow:0 0 22px 4px rgba(255,217,138,.55), inset 0 1px 0 #fff;
+}
+body.flash.signal::after{
+  content:"";position:fixed;inset:0;background:#FFF3D6;pointer-events:none;z-index:99;
+}
+
+main{flex:1;padding:16px;display:flex;flex-direction:column}
+.panel{display:none;flex:1;flex-direction:column;gap:14px}
+.panel.on{display:flex}
+
+/* ---------- Band + Klartext ---------- */
+.tape{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:14px;
+  padding:12px 14px;min-height:58px;display:flex;align-items:center;
+  font-family:var(--mono);font-size:26px;letter-spacing:.14em;color:var(--brass);
+  overflow:hidden;white-space:nowrap;
+}
+.tape .ghost{color:rgba(239,227,203,.22);font-size:14px;letter-spacing:.16em}
+.readout{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:14px;min-height:84px;
+  font-family:var(--display);font-size:24px;letter-spacing:.1em;line-height:1.5;
+  word-break:break-word;
+}
+.readout .caret{color:var(--brass);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.readout.empty{font-family:var(--body);font-size:14px;letter-spacing:0;color:rgba(239,227,203,.4);font-weight:400}
+
+/* ---------- Taste ---------- */
+.keywrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:6px 0}
+.key{
+  width:min(62vw,210px);aspect-ratio:1;border-radius:50%;border:none;padding:0;
+  background:radial-gradient(circle at 34% 28%, #FFDFA3 0%, var(--brass) 42%, var(--brass-dark) 100%);
+  box-shadow:0 10px 0 #6E430B, 0 16px 26px rgba(0,0,0,.5), inset 0 -6px 14px rgba(0,0,0,.25);
+  display:grid;place-items:center;cursor:pointer;touch-action:none;
+  transition:transform .05s, box-shadow .05s;
+}
+.key span{
+  font-family:var(--display);font-size:15px;letter-spacing:.14em;color:#4A2C05;
+}
+.key.down{transform:translateY(9px);box-shadow:0 1px 0 #6E430B, 0 4px 12px rgba(0,0,0,.5), inset 0 6px 18px rgba(0,0,0,.35)}
+.hint{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:rgba(239,227,203,.42);text-align:center}
+
+/* ---------- Buttons ---------- */
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button.b{
+  font-family:var(--body);font-weight:700;font-size:14px;
+  background:var(--panel);color:var(--paper);border:1px solid var(--line);
+  border-radius:12px;padding:12px 16px;cursor:pointer;flex:1;min-width:0;
+}
+button.b:active{transform:translateY(1px)}
+button.b.gold{background:var(--brass);color:#3B2202;border-color:transparent}
+button.b:disabled{opacity:.4}
+.seg{display:flex;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{
+  flex:1;background:none;border:none;color:rgba(239,227,203,.55);
+  font-family:var(--body);font-weight:700;font-size:12.5px;padding:9px 4px;border-radius:9px;cursor:pointer;
+}
+.seg button[aria-pressed="true"]{background:var(--brass);color:#3B2202}
+label.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:rgba(239,227,203,.45);text-transform:uppercase}
+
+/* ---------- Schreiben ---------- */
+textarea{
+  width:100%;background:var(--panel-2);color:var(--paper);border:1px solid var(--line);
+  border-radius:14px;padding:14px;font-family:var(--display);font-size:20px;letter-spacing:.06em;
+  resize:none;height:96px;user-select:text;-webkit-user-select:text;
+}
+textarea:focus{outline:2px solid var(--brass);outline-offset:1px}
+.morseout{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;
+  font-family:var(--mono);font-size:20px;color:var(--brass);line-height:1.9;
+  word-break:break-word;flex:1;min-height:90px;
+}
+.morseout .w{display:inline-block;margin-right:16px}
+.morseout .c{display:inline-block;margin-right:9px;padding:1px 4px;border-radius:5px}
+.morseout .c.lit{background:var(--brass);color:#3B2202}
+
+/* ---------- Lernen ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.cell{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:10px 6px;text-align:center;cursor:pointer;
+}
+.cell:active,.cell.lit{background:var(--brass);border-color:transparent}
+.cell:active .ch,.cell.lit .ch{color:#3B2202}
+.cell:active .mo,.cell.lit .mo,.cell:active .di,.cell.lit .di{color:#5A3505}
+.cell .ch{font-family:var(--display);font-size:20px;color:var(--paper)}
+.cell .mo{font-family:var(--mono);font-size:14px;color:var(--brass);letter-spacing:.08em;margin-top:3px}
+.cell .di{font-family:var(--mono);font-size:9px;color:rgba(239,227,203,.4);margin-top:2px}
+h3.sec{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;color:rgba(239,227,203,.45);margin:6px 0 -4px;text-transform:uppercase}
+
+/* ---------- Spiel ---------- */
+.score{display:flex;gap:8px}
+.score div{
+  flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;
+}
+.score b{display:block;font-family:var(--display);font-size:22px;color:var(--brass)}
+.score span{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:rgba(239,227,203,.45)}
+.quiz{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{
+  font-family:var(--display);font-size:30px;padding:20px 0;border-radius:16px;
+  background:var(--panel);border:1px solid var(--line);color:var(--paper);cursor:pointer;
+}
+.opt.right{background:var(--mint);color:#062D22;border-color:transparent}
+.opt.wrong{background:var(--red);color:#2C0A02;border-color:transparent}
+.verdict{text-align:center;font-family:var(--display);font-size:18px;min-height:26px;letter-spacing:.06em}
+.verdict.ok{color:var(--mint)}
+.verdict.no{color:var(--red)}
+
+/* ---------- Tabs ---------- */
+nav{
+  display:flex;gap:4px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  background:var(--panel-2);border-top:1px solid var(--line);position:sticky;bottom:0;
+}
+nav button{
+  flex:1;background:none;border:none;color:rgba(239,227,203,.45);cursor:pointer;
+  padding:8px 2px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+}
+nav button i{font-style:normal;font-size:19px;line-height:1}
+nav button[aria-pressed="true"]{color:var(--brass);background:rgba(240,169,59,.1)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">FUNKSTATION<small>PUNKT · STRICH</small></div>
+  <div class="toggles">
+    <button class="tg" id="tgSound" aria-pressed="true" title="Ton">🔊</button>
+    <button class="tg" id="tgFlash" aria-pressed="false" title="Bildschirm blitzt">💡</button>
+  </div>
+</header>
+<div class="lamp"></div>
+
+<main>
+
+  <!-- ===== MORSEN ===== -->
+  <section class="panel on" id="p-key">
+    <div class="tape" id="tape"><span class="ghost">Halt die Taste kurz = Punkt, lang = Strich</span></div>
+    <div class="readout empty" id="readout">Hier erscheint, was du funkst.</div>
+    <div class="keywrap">
+      <button class="key" id="key"><span>DRÜCKEN</span></button>
+      <div class="hint" id="keyHint">Pause = nächster Buchstabe · lange Pause = Leerzeichen</div>
+      <div class="hint" id="audioState" style="color:rgba(240,169,59,.7)">Tippe einmal auf den Bildschirm, dann ist der Ton da.</div>
+    </div>
+    <div class="seg" id="speedSeg">
+      <button data-unit="260" aria-pressed="true">Langsam</button>
+      <button data-unit="170">Mittel</button>
+      <button data-unit="110">Schnell</button>
+    </div>
+    <div class="row">
+      <button class="b" id="btnBack">Buchstabe weg</button>
+      <button class="b" id="btnClear">Alles löschen</button>
+    </div>
+  </section>
+
+  <!-- ===== SCHREIBEN ===== -->
+  <section class="panel" id="p-write">
+    <label class="lbl" for="txt">Deine Nachricht</label>
+    <textarea id="txt" maxlength="140" spellcheck="false">HALLO PAPA</textarea>
+    <div class="morseout" id="morseout"></div>
+    <div class="row">
+      <button class="b gold" id="btnPlay">▶ Abfunken</button>
+      <button class="b" id="btnStop">■ Stopp</button>
+    </div>
+    <div class="hint">Tipp: Lampe an (💡) und im dunklen Zimmer quer durchs Haus funken.</div>
+  </section>
+
+  <!-- ===== LERNEN ===== -->
+  <section class="panel" id="p-learn">
+    <div class="hint" style="text-align:left">Tippe einen Buchstaben an – du hörst und siehst ihn.</div>
+    <div id="learnHost" style="overflow:auto;display:flex;flex-direction:column;gap:10px"></div>
+  </section>
+
+  <!-- ===== SPIEL ===== -->
+  <section class="panel" id="p-game">
+    <div class="score">
+      <div><b id="sPts">0</b><span>Punkte</span></div>
+      <div><b id="sStreak">0</b><span>Serie</span></div>
+      <div><b id="sBest">0</b><span>Rekord</span></div>
+    </div>
+    <div class="seg" id="levelSeg">
+      <button data-level="0" aria-pressed="true">Stufe 1</button>
+      <button data-level="1">Stufe 2</button>
+      <button data-level="2">A–Z</button>
+      <button data-level="3">+ Zahlen</button>
+    </div>
+    <div class="quiz">
+      <button class="b gold" id="btnHear" style="flex:0 0 auto;padding:18px">🔊 Nochmal hören</button>
+      <div class="opts" id="opts"></div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+  </section>
+
+</main>
+
+<nav>
+  <button data-tab="p-key" aria-pressed="true"><i>⌁</i>Morsen</button>
+  <button data-tab="p-write"><i>✎</i>Schreiben</button>
+  <button data-tab="p-learn"><i>☰</i>ABC</button>
+  <button data-tab="p-game"><i>◎</i>Spiel</button>
+</nav>
+</div>
+
+<script>
+/* ================= Morse-Tabelle ================= */
+const M = {
+ A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",
+ K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",
+ U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",
+ "Ä":".-.-","Ö":"---.","Ü":"..--","ß":"...--..",
+ "0":"-----","1":".----","2":"..---","3":"...--","4":"....-",
+ "5":".....","6":"-....","7":"--...","8":"---..","9":"----.",
+ ".":".-.-.-",",":"--..--","?":"..--..","!":"-.-.--","/":"-..-.","-":"-....-"
+};
+const R = Object.fromEntries(Object.entries(M).map(([k,v])=>[v,k]));
+
+/* di-dah Sprechweise: letzter Punkt = "dit" */
+function didah(code){
+  return code.split("").map((c,i)=>{
+    if(c==="-") return "dah";
+    return i===code.length-1 ? "dit" : "di";
+  }).join("-");
+}
+
+/* ================= Ton ================= */
+let ac=null, osc=null, gain=null, soundOn=true, flashOn=false;
+
+function audio(){
+  if(ac) return ac;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!AC) return null;
+  /* Safari 16.4+: ignoriert damit den Stummschalter am iPhone */
+  try{ if(navigator.audioSession) navigator.audioSession.type = "playback"; }catch(e){}
+  ac = new AC();
+  gain = ac.createGain(); gain.gain.value = 0; gain.connect(ac.destination);
+  osc = ac.createOscillator(); osc.type = "sine"; osc.frequency.value = 620;
+  osc.connect(gain); osc.start();
+  return ac;
+}
+/* Bei der allerersten Berührung entsperren – vor allen anderen Handlern */
+function unlock(){
+  if(!audio()) return;
+  if(ac.state !== "running") ac.resume();
+  try{
+    const b = ac.createBuffer(1,1,22050), s = ac.createBufferSource();
+    s.buffer = b; s.connect(ac.destination); s.start(0);
+  }catch(e){}
+  showAudioState();
+}
+["pointerdown","touchstart","mousedown","keydown"].forEach(ev=>
+  window.addEventListener(ev, unlock, {capture:true, passive:true})
+);
+
+function signalOn(){
+  document.body.classList.add("signal");
+  if(!soundOn || !audio()) return;
+  if(ac.state !== "running") ac.resume();
+  const t = ac.currentTime;
+  gain.gain.cancelScheduledValues(t);
+  gain.gain.setValueAtTime(gain.gain.value, t);
+  gain.gain.linearRampToValueAtTime(0.3, t + 0.006);
+}
+function signalOff(){
+  document.body.classList.remove("signal");
+  if(!ac) return;
+  const t = ac.currentTime;
+  gain.gain.cancelScheduledValues(t);
+  gain.gain.setValueAtTime(gain.gain.value, t);
+  gain.gain.linearRampToValueAtTime(0, t + 0.009);
+}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+function showAudioState(){
+  const h = document.getElementById("audioState");
+  if(!h) return;
+  if(!soundOn){ h.textContent = "Ton ist aus – oben rechts auf 🔊 tippen."; return; }
+  if(!ac){ h.textContent = "Tippe einmal auf den Bildschirm, dann ist der Ton da."; return; }
+  h.textContent = ac.state === "running"
+    ? "Ton läuft. Am iPhone: Stummschalter aus, Lautstärke hoch."
+    : "Ton schläft noch – kurz auf 🔊 tippen.";
+}
+
+const tgSound=document.getElementById("tgSound"), tgFlash=document.getElementById("tgFlash");
+tgSound.onclick=async()=>{
+  soundOn=!soundOn;
+  tgSound.setAttribute("aria-pressed",soundOn);
+  if(!soundOn){ signalOff(); }
+  else{ unlock(); signalOn(); await sleep(350); signalOff(); }   /* Testton */
+  showAudioState();
+};
+tgFlash.onclick=()=>{flashOn=!flashOn;tgFlash.setAttribute("aria-pressed",flashOn);document.body.classList.toggle("flash",flashOn);};
+
+/* ================= Abspielen ================= */
+let token=0;
+async function playCode(code,unit,onSym){
+  const my=++token;
+  for(let i=0;i<code.length;i++){
+    if(my!==token) return false;
+    onSym && onSym(i);
+    signalOn();
+    await sleep(code[i]==="-"?unit*3:unit);
+    signalOff();
+    await sleep(unit);
+  }
+  onSym && onSym(-1);
+  return my===token;
+}
+async function playText(text,unit,onChar){
+  const my=++token;
+  const chars=[...text.toUpperCase()];
+  for(let n=0;n<chars.length;n++){
+    if(my!==token) return;
+    const ch=chars[n];
+    if(ch===" "){ onChar&&onChar(n); await sleep(unit*4); continue; }
+    const code=M[ch]; if(!code) continue;
+    onChar&&onChar(n);
+    for(const s of code){
+      if(my!==token){signalOff();return;}
+      signalOn(); await sleep(s==="-"?unit*3:unit);
+      signalOff(); await sleep(unit);
+    }
+    await sleep(unit*2);
+  }
+  onChar&&onChar(-1);
+}
+function stopAll(){ token++; signalOff(); }
+
+/* ================= Tabs ================= */
+document.querySelectorAll("nav button").forEach(b=>{
+  b.onclick=()=>{
+    stopAll();
+    document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id===b.dataset.tab));
+    if(b.dataset.tab==="p-game" && !current) nextQuestion();
+  };
+});
+
+/* ================= 1) Taste + Decoder ================= */
+let unit=260;
+document.querySelectorAll("#speedSeg button").forEach(b=>{
+  b.onclick=()=>{
+    unit=+b.dataset.unit;
+    document.querySelectorAll("#speedSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  };
+});
+
+const keyEl=document.getElementById("key"), tape=document.getElementById("tape"), readout=document.getElementById("readout");
+let pressStart=0, sym="", text="", tLetter=null, tWord=null, down=false;
+
+function renderTape(){
+  tape.innerHTML = sym ? sym : '<span class="ghost">Halt die Taste kurz = Punkt, lang = Strich</span>';
+}
+function renderText(){
+  if(!text){ readout.className="readout empty"; readout.textContent="Hier erscheint, was du funkst."; return; }
+  readout.className="readout";
+  readout.innerHTML = text.replace(/ /g,"&nbsp;&nbsp;")+'<span class="caret">▌</span>';
+}
+function commitLetter(){
+  if(!sym) return;
+  text += (R[sym] || "•");
+  sym=""; renderTape(); renderText();
+}
+function keyDown(e){
+  e.preventDefault();
+  if(down) return; down=true;
+  clearTimeout(tLetter); clearTimeout(tWord);
+  keyEl.classList.add("down");
+  pressStart=performance.now();
+  signalOn();
+}
+function keyUp(e){
+  if(!down) return; down=false;
+  e && e.preventDefault();
+  keyEl.classList.remove("down");
+  signalOff();
+  const dur=performance.now()-pressStart;
+  sym += dur < unit*2 ? "." : "-";
+  renderTape();
+  tLetter=setTimeout(commitLetter, unit*3.2);
+  tWord=setTimeout(()=>{ if(text && !text.endsWith(" ")){ text+=" "; renderText(); } }, unit*8);
+}
+keyEl.addEventListener("pointerdown",keyDown);
+keyEl.addEventListener("pointerup",keyUp);
+keyEl.addEventListener("pointercancel",keyUp);
+keyEl.addEventListener("pointerleave",e=>{if(down)keyUp(e)});
+keyEl.addEventListener("contextmenu",e=>e.preventDefault());
+addEventListener("keydown",e=>{ if(e.code==="Space" && document.getElementById("p-key").classList.contains("on")) keyDown(e); });
+addEventListener("keyup",e=>{ if(e.code==="Space" && document.getElementById("p-key").classList.contains("on")) keyUp(e); });
+
+document.getElementById("btnBack").onclick=()=>{
+  if(sym){ sym=sym.slice(0,-1); renderTape(); }
+  else { text=text.slice(0,-1); renderText(); }
+};
+document.getElementById("btnClear").onclick=()=>{ sym=""; text=""; renderTape(); renderText(); };
+renderTape(); renderText();
+
+/* ================= 2) Schreiben ================= */
+const txt=document.getElementById("txt"), morseout=document.getElementById("morseout");
+function renderMorse(lit=-1){
+  const chars=[...txt.value.toUpperCase()];
+  morseout.innerHTML = chars.map((ch,i)=>{
+    if(ch===" ") return '<span class="w"> </span>';
+    const code=M[ch];
+    if(!code) return "";
+    return `<span class="c${i===lit?" lit":""}">${code}</span>`;
+  }).join("") || '<span style="color:rgba(239,227,203,.3);font-size:14px">Schreib etwas ins Feld oben.</span>';
+}
+txt.addEventListener("input",()=>{stopAll();renderMorse();});
+document.getElementById("btnPlay").onclick=()=>playText(txt.value,unit,renderMorse);
+document.getElementById("btnStop").onclick=()=>{stopAll();renderMorse();};
+renderMorse();
+
+/* ================= 3) ABC ================= */
+const groups=[
+  ["Buchstaben","ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")],
+  ["Umlaute","ÄÖÜß".split("")],
+  ["Zahlen","0123456789".split("")],
+  ["Zeichen",[".",",","?","!","/","-"]]
+];
+const host=document.getElementById("learnHost");
+groups.forEach(([name,list])=>{
+  const h=document.createElement("h3"); h.className="sec"; h.textContent=name; host.appendChild(h);
+  const g=document.createElement("div"); g.className="grid";
+  list.forEach(ch=>{
+    const c=document.createElement("div"); c.className="cell";
+    c.innerHTML=`<div class="ch">${ch}</div><div class="mo">${M[ch]}</div><div class="di">${didah(M[ch])}</div>`;
+    c.onclick=async()=>{ stopAll(); c.classList.add("lit"); await playCode(M[ch],unit); c.classList.remove("lit"); };
+    g.appendChild(c);
+  });
+  host.appendChild(g);
+});
+
+/* ================= 4) Spiel ================= */
+const POOLS=[
+  ["E","I","S","H","T","M","O"],
+  ["E","I","S","H","T","M","O","A","N","D","U","R","K","G","W"],
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("")
+];
+let level=0, pts=0, streak=0, best=0, current=null, locked=false;
+const optsEl=document.getElementById("opts"), verdict=document.getElementById("verdict");
+document.querySelectorAll("#levelSeg button").forEach(b=>{
+  b.onclick=()=>{
+    level=+b.dataset.level; streak=0; updateScore();
+    document.querySelectorAll("#levelSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    nextQuestion();
+  };
+});
+function updateScore(){
+  best=Math.max(best,streak);
+  sPts.textContent=pts; sStreak.textContent=streak; sBest.textContent=best;
+}
+function nextQuestion(){
+  locked=false; verdict.textContent=""; verdict.className="verdict";
+  const pool=POOLS[level];
+  current=pool[Math.floor(Math.random()*pool.length)];
+  const set=new Set([current]);
+  while(set.size<Math.min(4,pool.length)) set.add(pool[Math.floor(Math.random()*pool.length)]);
+  const arr=[...set].sort(()=>Math.random()-.5);
+  optsEl.innerHTML="";
+  arr.forEach(ch=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=ch;
+    b.onclick=()=>answer(ch,b);
+    optsEl.appendChild(b);
+  });
+  setTimeout(()=>playCode(M[current],unit),450);
+}
+function answer(ch,btn){
+  if(locked) return; locked=true;
+  stopAll();
+  if(ch===current){
+    btn.classList.add("right"); pts+=10; streak++; updateScore();
+    verdict.textContent=["TREFFER!","SAUBER!","VOLLTREFFER!","STARK!"][Math.floor(Math.random()*4)];
+    verdict.className="verdict ok";
+    setTimeout(nextQuestion,850);
+  }else{
+    btn.classList.add("wrong"); streak=0; updateScore();
+    [...optsEl.children].find(b=>b.textContent===current).classList.add("right");
+    verdict.textContent=`Das war ${current} = ${M[current]}`;
+    verdict.className="verdict no";
+    setTimeout(nextQuestion,1900);
+  }
+}
+document.getElementById("btnHear").onclick=()=>{ if(current) playCode(M[current],unit); };
+updateScore();
+showAudioState();
+</script>
+</body>
+</html>
