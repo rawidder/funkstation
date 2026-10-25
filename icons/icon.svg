@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="22%" r="85%">
+      <stop offset="0" stop-color="#1B4457"/>
+      <stop offset="1" stop-color="#0A1B26"/>
+    </radialGradient>
+    <radialGradient id="lamp" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#FFD98A"/>
+      <stop offset=".55" stop-color="#F0A93B"/>
+      <stop offset="1" stop-color="#F0A93B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- Funkwellen -->
+  <g fill="none" stroke="#F0A93B" stroke-width="18" stroke-linecap="round">
+    <path d="M196 118a84 84 0 0 0 0 112" opacity=".95"/>
+    <path d="M316 118a84 84 0 0 1 0 112" opacity=".95"/>
+    <path d="M156 84a136 136 0 0 0 0 180" opacity=".55"/>
+    <path d="M356 84a136 136 0 0 1 0 180" opacity=".55"/>
+  </g>
+  <!-- Leuchte oben -->
+  <circle cx="256" cy="174" r="46" fill="url(#lamp)" opacity=".7"/>
+  <circle cx="256" cy="174" r="20" fill="#FFD98A"/>
+  <!-- Mast -->
+  <g fill="none" stroke="#EFE3CB" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 196 L208 352 M256 196 L304 352"/>
+    <path d="M236 262 L276 262 M222 308 L290 308 M236 262 L290 308 M276 262 L222 308"/>
+  </g>
+  <!-- Morse: · — · -->
+  <g fill="#4FD1A5">
+    <circle cx="170" cy="400" r="15"/>
+    <rect x="204" y="385" width="104" height="30" rx="15"/>
+    <circle cx="342" cy="400" r="15"/>
+  </g>
+</svg>
